@@ -1,0 +1,52 @@
+[
+    {
+        "id":1,
+        "name":"Candidate1",
+        "age": 45,
+        "votes":0,
+        "pincode":"226022",
+        "partyName":"BJP",
+        "image":"",
+        "partySymbol":""
+    },
+    {
+        "id":2,
+        "name":"Candidate2",
+        "age": 45,
+        "votes":0,
+        "pincode":"226022",
+        "partyName":"INC",
+        "image":"",
+        "partySymbol":""
+    },
+    {
+        "id":3,
+        "name":"Candidate3",
+        "age": 45,
+        "votes":0,
+        "pincode":"226022",
+        "partyName":"SP",
+        "image":"",
+        "partySymbol":""
+    },
+    {
+        "id":4,
+        "name":"Candidate4",
+        "age": 45,
+        "votes":0,
+        "pincode":"226024",
+        "partyName":"BSP",
+        "image":"",
+        "partySymbol":""
+    },
+    {
+        "id":5,
+        "name":"Candidate5",
+        "age": 45,
+        "votes":0,
+        "pincode":"226023",
+        "partyName":"RJD",
+        "image":"",
+        "partySymbol":""
+    }
+]

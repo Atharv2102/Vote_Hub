@@ -1,36 +1,34 @@
 import React, { useState } from 'react';
-<<<<<<< HEAD
-import { Link } from 'react-router-dom';
-=======
 import { useNavigate } from 'react-router-dom';
->>>>>>> upstream/main
 import axios from 'axios';
+import { useUserContext } from '../context/userContext';  // Import your context hook
 
-function Vote({ userId }) {
+function Vote() {
+  const { pincode: contextPincode, userId } = useUserContext();  // Access pincode and userId from context
   const [pinCode, setPinCode] = useState('');
-<<<<<<< HEAD
-  const [candidates, setCandidates] = useState([]);
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const fetchCandidates = async () => {
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await axios.get(`http://localhost:5002/api/auth/candidate?pinCode=${pinCode}`);
-      setCandidates(response.data);
-    } catch (e) {
-      setError('Failed to fetch candidates');
-    } finally {
-      setLoading(false);
-=======
-  const [error, setError] = useState('');
   const navigate = useNavigate(); // For navigation after verification
 
   const handleSubmit = async () => {
+    // Basic validation for pincode (assuming it's a 6-digit number)
+    if (!/^\d{6}$/.test(pinCode)) {
+      setError('Please enter a valid 6-digit pincode.');
+      return;
+    }
+
+    setError('');
+    setLoading(true);
+    
     try {
-      // API call to verify the pin code
+      // Compare the user input pincode with the one from context
+      if (pinCode !== contextPincode) {
+        setError('Entered pincode does not match the stored pincode.');
+        setLoading(false);
+        return;
+      }
+
+      // If pincode matches, proceed with API call
       const response = await axios.post('http://localhost:5002/api/vote/verify-pincode', {
         userId, // Assuming you pass the userId as a prop
         pinCode
@@ -42,7 +40,8 @@ function Vote({ userId }) {
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to verify pin code');
->>>>>>> upstream/main
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,38 +62,14 @@ function Vote({ userId }) {
           placeholder="e.g., 123456"
         />
         <button
-<<<<<<< HEAD
-          onClick={fetchCandidates}
-=======
           onClick={handleSubmit}
->>>>>>> upstream/main
           className="ml-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300"
+          disabled={loading}
         >
-          Fetch Candidates
+          {loading ? 'Fetching...' : 'Fetch Candidates'}
         </button>
-<<<<<<< HEAD
-      </div>
-
-      {loading && <p className="text-blue-600">Loading...</p>}
-      {error && <p className="text-red-600">{error}</p>}
-
-      <div className="mt-6">
-        {candidates.length > 0 ? (
-          <ul className="list-disc pl-5">
-            {candidates.map((candidate) => (
-              <li key={candidate.id} className="mb-2">
-                <p className="text-gray-800">{candidate.name}</p>
-                <p className="text-gray-600">Party: {candidate.party}</p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          pinCode && !loading && !error && <p>No candidates found.</p>
-        )}
-=======
 
         {error && <p className="text-red-500 mt-4">{error}</p>}
->>>>>>> upstream/main
       </div>
     </div>
   );

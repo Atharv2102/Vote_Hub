@@ -11,6 +11,8 @@ export default function VerifyOTP() {
     ev.preventDefault();
 
     try {
+
+      
       const { data } = await axios.post('http://localhost:5002/api/auth/verify-otp', {
         userId,
         otp

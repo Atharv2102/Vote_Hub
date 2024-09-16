@@ -7,6 +7,7 @@ const UserSchema = new mongoose.Schema({
   pinCode:{type:String,required:true},
   password: { type: String, required: true },
   isVerified:{type:Boolean, default:false},
+  photo: { type: String },
   resetPasswordToken:String,
   resetPasswordExpiresAt:Date,
   verificationToken:String,

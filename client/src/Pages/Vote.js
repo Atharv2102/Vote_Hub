@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
+<<<<<<< HEAD
 import { Link } from 'react-router-dom';
+=======
+import { useNavigate } from 'react-router-dom';
+>>>>>>> upstream/main
 import axios from 'axios';
 
-function Vote() {
+function Vote({ userId }) {
   const [pinCode, setPinCode] = useState('');
+<<<<<<< HEAD
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -19,6 +24,25 @@ function Vote() {
       setError('Failed to fetch candidates');
     } finally {
       setLoading(false);
+=======
+  const [error, setError] = useState('');
+  const navigate = useNavigate(); // For navigation after verification
+
+  const handleSubmit = async () => {
+    try {
+      // API call to verify the pin code
+      const response = await axios.post('http://localhost:5002/api/vote/verify-pincode', {
+        userId, // Assuming you pass the userId as a prop
+        pinCode
+      });
+
+      if (response.status === 200) {
+        // Navigate to the candidates page with pinCode and fetched candidates
+        navigate(`/candidate/${pinCode}`, { state: { candidates: response.data.candidates } });
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to verify pin code');
+>>>>>>> upstream/main
     }
   };
 
@@ -39,11 +63,16 @@ function Vote() {
           placeholder="e.g., 123456"
         />
         <button
+<<<<<<< HEAD
           onClick={fetchCandidates}
+=======
+          onClick={handleSubmit}
+>>>>>>> upstream/main
           className="ml-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300"
         >
           Fetch Candidates
         </button>
+<<<<<<< HEAD
       </div>
 
       {loading && <p className="text-blue-600">Loading...</p>}
@@ -62,6 +91,10 @@ function Vote() {
         ) : (
           pinCode && !loading && !error && <p>No candidates found.</p>
         )}
+=======
+
+        {error && <p className="text-red-500 mt-4">{error}</p>}
+>>>>>>> upstream/main
       </div>
     </div>
   );

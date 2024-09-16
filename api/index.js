@@ -3,7 +3,7 @@ const cors = require('cors'); // Import cors package
 const connectDB = require('./config/db.js');
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5002;
 
 // Enable CORS 
 app.use(cors({
@@ -15,6 +15,7 @@ app.use(cors({
 app.use(express.json());
 
 app.use("/api/auth", require("./routes/authRoutes.js"));
+app.use("/api/vote",require("./routes/voteRoutes.js") )
 
 app.listen(PORT, () => {
   connectDB();

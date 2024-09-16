@@ -3,14 +3,15 @@ import { Link, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-
+import { useUserContext } from '../context/userContext';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [redirect, setRedirect] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-
+  const { pincode, setPincode } = useUserContext();
+  const { userId, setUserID } = useUserContext();
   useEffect(() => {
     const storedEmail = localStorage.getItem('rememberedEmail');
     const storedPass = localStorage.getItem('rememberedPass');
@@ -27,7 +28,18 @@ export default function LoginPage() {
       const { data } = await axios.post('http://localhost:5002/api/auth/login', { email, password }, { withCredentials: true });
 
       alert('Login success');
-
+      //console.log(data);
+      if (data.user.pinCode) {
+        setPincode(data.user.pinCode); 
+        setUserID(data.user._id);
+        
+        // pincode done on login
+        //console.log("pinocde is present");
+        console.log(data.user.pinCode)
+        console.log(data.user._id);
+      }else{
+        console.log("pincode is absent");
+      }
       if (rememberMe) {
         localStorage.setItem('rememberedEmail', email);
         localStorage.setItem('rememberedPass', password);
@@ -35,14 +47,14 @@ export default function LoginPage() {
         localStorage.removeItem('rememberedEmail');
         localStorage.removeItem('rememberedPass');
       }
-
+      
       setRedirect(true);
     } catch (e) {
       console.error('Login failed:', e.response ? e.response.data : e.message);
       alert('Login failed');
     }
   }
-
+  
   if (redirect) {
     return <Navigate to="/vote" />;
   }

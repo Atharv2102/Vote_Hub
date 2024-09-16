@@ -12,6 +12,8 @@ import Notfound from './Pages/Notfound';
 import Login from './Pages/Login';
 import SignIn from './Pages/SignIn';  
 import Candidate from './Components/Candidate';    
+import Verify_Otp from '../src/Pages/Verify-Otp';
+
 const Applayout=()=>{
     return(
         <div>
@@ -49,6 +51,11 @@ const appRouter= createBrowserRouter([
                 path:"/login",
                 element:<Login/>
             },
+            {
+                path:"/verify_otp",
+                element:<Verify_Otp/>
+            }
+            ,
             {
                 path:"/signin",
                 element:<SignIn/>

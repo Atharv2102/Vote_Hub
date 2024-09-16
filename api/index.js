@@ -5,11 +5,11 @@ const connectDB = require('./config/db.js');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Enable CORS for all origins (or configure as needed)
+// Enable CORS 
 app.use(cors({
-  origin: 'http://localhost:3000', // Allow requests from this origin
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
-  credentials: true // Allow credentials (e.g., cookies) if needed
+  origin: 'http://localhost:3000', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+  credentials: true
 }));
 
 app.use(express.json());

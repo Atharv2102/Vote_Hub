@@ -4,6 +4,8 @@ const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
 const OtpVerificationSchema = require('../models/Otp');
 const OtpVerification = require('../models/Otp');
+const multer = require('multer');
+const path = require('path');
 
 dotenv.config();
 
@@ -25,46 +27,80 @@ transporter.verify((error, success) => {
   }
 });
 
+
+//uploading image
+
+const storage = multer.diskStorage({
+  destination: './uploads/', // Save files to 'uploads' folder
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // Set file size limit (10MB)
+  fileFilter: (req, file, cb) => {
+    const fileTypes = /jpeg|jpg|png/;
+    const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = fileTypes.test(file.mimetype);
+
+    if (extname && mimetype) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Images only (jpeg, jpg, png)!'));
+    }
+  }
+}).single('photo'); // Expect a single file upload under the field 'photo'
+
+
+
+
 // Signup function
 const signup = async (req, res) => {
-  const { voterId, name, email, pinCode, password } = req.body;
-
-  try {
-    // Validate input
-    if (!email || !name || !voterId || !pinCode || !password) {
-      return res.status(400).json({ success: "failed", msg: "Please enter all the fields" });
+  upload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ success: "failed", msg: err.message });
     }
 
-    // Check if user exists
-    const userAlreadyExists = await User.findOne({ email, voterId });
-    if (userAlreadyExists) {
-      return res.status(400).json({ success: "failed", msg: "User already exists" });
+    const { voterId, name, email, pinCode, password } = req.body;
+
+    try {
+      // Validate input
+      if (!email || !name || !voterId || !pinCode || !password || !req.file) {
+        return res.status(400).json({ success: "failed", msg: "Please enter all the fields and upload a photo" });
+      }
+
+      // Check if user exists
+      const userAlreadyExists = await User.findOne({ email, voterId });
+      if (userAlreadyExists) {
+        return res.status(400).json({ success: "failed", msg: "User already exists" });
+      }
+
+      // Hash the password
+      const hashedPass = await bcrypt.hash(password, 10);
+      const verificationToken = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+
+      // Create user in DB
+      const user = new User({
+        voterId,
+        name,
+        email,
+        pinCode,
+        password: hashedPass,
+        verificationToken,
+        verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000, // 1 day
+        photo: req.file.path // Store the uploaded file path
+      });
+
+      await user.save();
+
+      // Send OTP via email
+      await sendOtpVerificationEmail(user, res);
+    } catch (err) {
+      return res.status(500).json({ success: "failed", msg: err.message });
     }
-
-    // Hash the password
-    const hashedPass = await bcrypt.hash(password, 10);
-    const verificationToken = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
-
-    // Create user in DB
-    const user = new User({
-      voterId,
-      name,
-      email,
-      pinCode,
-      password: hashedPass,
-      verificationToken,
-      verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000 // 1 day
-    });
-
-    await user.save();
-
-    // Send OTP via email
-    await sendOtpVerificationEmail(user, res);
-
-  } catch (err) {
-    // Catch any errors and respond with status 500
-    return res.status(500).json({ success: "failed", msg: err.message });
-  }
+  });
 };
 
 const login = async (req, res) => {
@@ -218,6 +254,8 @@ const sendOtpVerificationEmail = async (user, res) => {
   }
 };
 
+
+
 const resendOtp = async (req, res) => {
   try {
     let { userId, email } = req.body;
@@ -237,5 +275,7 @@ const resendOtp = async (req, res) => {
 }; // <-- Closing the function properly
 
 
-module.exports = { signup, verifyOtp, login, logout , resendOtp};
+
+
+module.exports = { signup, verifyOtp, login, logout , resendOtp,upload};
 

@@ -8,8 +8,9 @@ router.post("/signup",signup)
 router.post('/login',login);
 
 router.post('/logout', logout);
-
+// router.post('./upload',upload);
 router.post('/verify-otp', verifyOtp);
 router.post("/resend-otp", resendOtp);
+
 
 module.exports = router;

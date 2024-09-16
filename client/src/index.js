@@ -12,6 +12,7 @@ import Notfound from './Pages/Notfound';
 import Login from './Pages/Login';
 import SignIn from './Pages/SignIn';  
 import Candidate from './Components/Candidate';    
+import VerifyOTP from './Pages/VerifyOtp';
 const Applayout=()=>{
     return(
         <div>
@@ -60,6 +61,10 @@ const appRouter= createBrowserRouter([
             {
                 path:"/candidate/:pinCode",
                 element:<Candidate/>
+            },
+            {
+                path:"/verify-otp",
+                element:<VerifyOTP/>
             }
         ]
     }

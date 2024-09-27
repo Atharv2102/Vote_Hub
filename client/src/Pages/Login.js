@@ -4,14 +4,17 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { useUserContext } from '../context/userContext';
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [redirect, setRedirect] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState(''); // State for error message
   const { pincode, setPincode } = useUserContext();
   const { userId, setUserID } = useUserContext();
+
   useEffect(() => {
     const storedEmail = localStorage.getItem('rememberedEmail');
     const storedPass = localStorage.getItem('rememberedPass');
@@ -26,32 +29,26 @@ export default function LoginPage() {
 
     try {
       const { data } = await axios.post('http://localhost:5002/api/auth/login', { email, password }, { withCredentials: true });
-
-      alert('Login success');
-      //console.log(data);
-      if (data.user.pinCode) {
-        setPincode(data.user.pinCode); 
-        setUserID(data.user._id);
-        
-        // pincode done on login
-        //console.log("pinocde is present");
-        console.log(data.user.pinCode)
-        console.log(data.user._id);
-      }else{
-        console.log("pincode is absent");
-      }
-      if (rememberMe) {
-        localStorage.setItem('rememberedEmail', email);
-        localStorage.setItem('rememberedPass', password);
-      } else {
-        localStorage.removeItem('rememberedEmail');
-        localStorage.removeItem('rememberedPass');
-      }
+      //console.log(data.user.pinCode)
+      // Clear error message on successful login
+      setError('');
       
-      setRedirect(true);
+      if (data.user.pinCode) {
+        setPincode(data.user.pinCode);
+        setUserID(data.user._id);
+        if (rememberMe) {
+          localStorage.setItem('rememberedEmail', email);
+          localStorage.setItem('rememberedPass', password);
+        } else {
+          localStorage.removeItem('rememberedEmail');
+          localStorage.removeItem('rememberedPass');
+        }
+        setRedirect(true);
+      } else {
+        setError('Pincode is absent.');
+      }
     } catch (e) {
-      console.error('Login failed:', e.response ? e.response.data : e.message);
-      alert('Login failed');
+      setError(e.response?.data?.message || 'Email/Password incorrect');
     }
   }
   
@@ -61,7 +58,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex w-full h-full px-10 py-10 justify-center mt-20 bg-gray-100">
-      <div className="bg-white w-full sm:w-full md:w-1/2 lg:w-1/3 px-7 py-7 rounded-xl shadow-lg">
+      <div className="bg-white w-full sm:w-full md:1/2 lg:w-1/3 px-7 py-7 rounded-xl shadow-lg">
         <form className="flex flex-col w-auto items-center" onSubmit={loginUser}>
           <h1 className="font-extrabold mb-5 text-gray-800 text-2xl">Sign In</h1>
 
@@ -108,6 +105,8 @@ export default function LoginPage() {
           <div className="w-full py-4">
             <button type="submit" className="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">Sign in</button>
           </div>
+
+          {error && <p className="text-red-500 mb-4">{error}</p>} {/* Display error message */}
 
           <div className="w-full py-2">
             <Link to="/signin">

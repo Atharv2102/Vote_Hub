@@ -118,7 +118,7 @@ const login = async (req, res) => {
       return res.status(400).json({ success: "failed", msg: "Invalid credentials" });
     }
 
-    // Check if user is verified
+    // Check if the user is verified
     if (!user.isVerified) {
       return res.status(400).json({ success: "failed", msg: "Account is not verified. Please verify your account first." });
     }
@@ -129,11 +129,15 @@ const login = async (req, res) => {
       return res.status(400).json({ success: "failed", msg: "Invalid credentials" });
     }
 
-    // Store user session
-    // req.session.userId = user._id; // Assuming you're using express-session for managing sessions
+    // Store user session (assuming you're using express-session)
+    req.session.userId = user._id;  // Storing user ID in session
+    req.session.isAuthenticated = true;  // Optional: Store authenticated state
+
+   
 
     // Respond with success
-    return res.json({ success: "success", msg: "Logged in successfully" });
+    //console.log("printing pincode from server " +user.pinCode)
+    return res.json({ success: "success", msg: "Logged in successfully", user: { id: user._id, email: user.email , pinCode :user.pinCode} });
 
   } catch (err) {
     // Catch any errors and respond with status 500
@@ -143,25 +147,22 @@ const login = async (req, res) => {
 
 const logout = (req, res) => {
   try {
-    // If using JWT, you can ask the client to delete the token from the client side.
-    // Alternatively, you can implement token blacklisting or expiration mechanisms here.
-
-    // If using sessions, you'd destroy the session like this:
-    // req.session.destroy(err => {
-    //   if (err) {
-    //     return res.status(500).json({ success: "failed", msg: "Logout failed" });
-    //   }
-    //   res.clearCookie('sessionId'); // Example if using cookies
-    //   return res.json({ success: "success", msg: "Logged out successfully" });
-    // });
-
-    // Simple response if using JWT
-    return res.json({ success: "success", msg: "Logged out successfully" });
-
+    // Destroy the session
+    req.session.destroy(err => {
+      if (err) {
+        return res.status(500).json({ success: "failed", msg: "Logout failed" });
+      }
+      
+      // Clear the session cookie if you're using cookies to manage sessions
+      res.clearCookie('connect.sid'); // Replace 'connect.sid' with the actual name of your session cookie if it's different
+      
+      return res.json({ success: "success", msg: "Logged out successfully" });
+    });
   } catch (err) {
     return res.status(500).json({ success: "failed", msg: err.message });
   }
 };
+
 
 // Verify OTP function
 const verifyOtp = async (req, res) => {

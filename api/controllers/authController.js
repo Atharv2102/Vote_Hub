@@ -104,45 +104,52 @@ const signup = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  const { email, password } = req.body;
+    const { email, password } = req.body;
 
-  try {
-    // Validate input
-    if (!email || !password) {
-      return res.status(400).json({ success: "failed", msg: "Please provide email and password" });
+    try {
+        // Validate input
+        if (!email || !password) {
+            return res.status(400).json({ success: "failed", msg: "Please provide email and password" });
+        }
+
+        // Check if the user exists
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ success: "failed", msg: "Invalid credentials" });
+        }
+
+        // Check if the user is verified
+        if (!user.isVerified) {
+            return res.status(400).json({ success: "failed", msg: "Account is not verified. Please verify your account first." });
+        }
+
+        // Compare the entered password with the hashed password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ success: "failed", msg: "Invalid credentials" });
+        }
+
+        // Regenerate session
+        req.session.regenerate((err) => {
+            if (err) {
+                return res.status(500).json({ success: "failed", msg: "Could not regenerate session" });
+            }
+
+            // Store user session
+            req.session.userId = user._id;  // Storing user ID in session
+            req.session.isAuthenticated = true;  // Optional: Store authenticated state
+
+            // Optionally set a new expiration time
+            req.session.cookie.expires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
+            // Respond with success
+            return res.json({ success: "success", msg: "Logged in successfully", user: { id: user._id, email: user.email, pinCode: user.pinCode } });
+        });
+
+    } catch (err) {
+        // Catch any errors and respond with status 500
+        return res.status(500).json({ success: "failed", msg: err.message });
     }
-
-    // Check if the user exists
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ success: "failed", msg: "Invalid credentials" });
-    }
-
-    // Check if the user is verified
-    if (!user.isVerified) {
-      return res.status(400).json({ success: "failed", msg: "Account is not verified. Please verify your account first." });
-    }
-
-    // Compare the entered password with the hashed password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ success: "failed", msg: "Invalid credentials" });
-    }
-
-    // Store user session (assuming you're using express-session)
-    req.session.userId = user._id;  // Storing user ID in session
-    req.session.isAuthenticated = true;  // Optional: Store authenticated state
-
-   
-
-    // Respond with success
-    //console.log("printing pincode from server " +user.pinCode)
-    return res.json({ success: "success", msg: "Logged in successfully", user: { id: user._id, email: user.email , pinCode :user.pinCode} });
-
-  } catch (err) {
-    // Catch any errors and respond with status 500
-    return res.status(500).json({ success: "failed", msg: err.message });
-  }
 };
 
 const logout = (req, res) => {
@@ -156,7 +163,7 @@ const logout = (req, res) => {
       // Clear the session cookie if you're using cookies to manage sessions
       res.clearCookie('connect.sid'); // Replace 'connect.sid' with the actual name of your session cookie if it's different
       
-      return res.json({ success: "success", msg: "Logged out successfully" });
+      return res.json({ success: "success", msg: "Logged out successfully" , });
     });
   } catch (err) {
     return res.status(500).json({ success: "failed", msg: err.message });

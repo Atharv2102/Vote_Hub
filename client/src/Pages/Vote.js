@@ -22,14 +22,14 @@ function Vote() {
     
     try {
       // Compare the user input pincode with the one from context
-      console.log(contextPincode);
+     // console.log(contextPincode);
       //console.log(pinCode)
       if (pinCode !== contextPincode) {
         setError('Entered pincode does not match the stored pincode.');
         setLoading(false);
         return;
       }
-
+      console.log("from vote.js "+userId);
       // If pincode matches, proceed with API call
       const response = await axios.post('http://localhost:5002/api/vote/verifypincode', {
         userId, // Assuming you pass the userId as a prop

@@ -37,7 +37,7 @@ const appRouter = createBrowserRouter([
             { path: "/login", element: <Login /> },
             { path: "/signin", element: <SignIn /> },
             { path: "/candidate", element: <Candidate /> },
-            { path: "/candidate/:pinCode", element: <Candidate /> },
+            { path: "/candidate/:pinCode", element: <Candidate/> },
             { path: "/verify-otp", element: <VerifyOTP /> }
         ]
     }

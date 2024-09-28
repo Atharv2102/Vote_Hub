@@ -2,6 +2,9 @@
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
+
+console.log('MongoDB URI:', process.env.MONGO_URI);
+
 const store = new MongoDBStore({
   uri: process.env.MONGO_URI, // MongoDB URI
   collection: 'sessions' // Collection to store sessions
@@ -10,13 +13,16 @@ const store = new MongoDBStore({
 store.on('error', (error) => {
   console.log('Session store error:', error);
 });
+store.on('connected', () => {
+  console.log('Connected to MongoDB session store');
+});
 
 module.exports = session({
-  secret: '1234DHAILITARDUDH', // Replace with a strong secret key
+  secret: 'DHAILITARDUDH', 
   resave: false,
   saveUninitialized: false,
   store: store,
   cookie: {
-    maxAge: 2 * 60 * 1000 // 2-minute session expiration
+    maxAge: 30 * 60 * 1000,//3 din
   }
 });

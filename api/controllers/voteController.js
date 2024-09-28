@@ -5,11 +5,12 @@ const User = require('../models/User'); // Assuming a User model for MongoD
 
 const verifypincode = async (req, res) => {
   const { userId, pinCode } = req.body;
-
+  console.log(userId);
+  console.log(pinCode)
   try {
     // Find user by ID
     const user = await User.findById(userId);
-
+    console.log(user);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }

@@ -35,7 +35,8 @@ export default function LoginPage() {
       
       if (data.user.pinCode) {
         setPincode(data.user.pinCode);
-        setUserID(data.user._id);
+        setUserID(data.user.id);
+        console.log(data.user.id);
         if (rememberMe) {
           localStorage.setItem('rememberedEmail', email);
           localStorage.setItem('rememberedPass', password);

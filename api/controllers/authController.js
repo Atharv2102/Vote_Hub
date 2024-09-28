@@ -128,19 +128,25 @@ const login = async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ success: "failed", msg: "Invalid credentials" });
         }
-
+        console.log("old session id = "+req.session.id);
         // Regenerate session
+        
         req.session.regenerate((err) => {
             if (err) {
                 return res.status(500).json({ success: "failed", msg: "Could not regenerate session" });
             }
 
             // Store user session
-            req.session.userId = user._id;  // Storing user ID in session
-            req.session.isAuthenticated = true;  // Optional: Store authenticated state
-
+           // req.session.user.userId = user._id;  // Storing user ID in session
+            req.session.cookie.isAuthenticated = "true";  // Optional: Store authenticated state
+            console.log("new session id = "+req.session.id)
+            console.log(req.session);
+           // console.log(req.session.isAuthenticated)
             // Optionally set a new expiration time
-            req.session.cookie.expires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+            req.session.cookie.maxAge = 30 * 60 * 1000; // 30 minutes
+            console.log("req.session.cookie = " +req.session)
+            console.log( "Authentication state  = "+req.session.cookie.isAuthenticated)
+            console.log("Session expires at:", req.session.cookie.expires);
 
             // Respond with success
             return res.json({ success: "success", msg: "Logged in successfully", user: { id: user._id, email: user.email, pinCode: user.pinCode } });
@@ -154,21 +160,33 @@ const login = async (req, res) => {
 
 const logout = (req, res) => {
   try {
-    // Destroy the session
-    req.session.destroy(err => {
-      if (err) {
-        return res.status(500).json({ success: "failed", msg: "Logout failed" });
+      // Check if user is authenticated
+      if (!req.session.isAuthenticated) {
+          return res.status(400).json({ success: "failed", msg: "User is not logged in" });
       }
-      
-      // Clear the session cookie if you're using cookies to manage sessions
-      res.clearCookie('connect.sid'); // Replace 'connect.sid' with the actual name of your session cookie if it's different
-      
-      return res.json({ success: "success", msg: "Logged out successfully" , });
-    });
+
+      // Store the user ID for reference if needed
+      const userId = req.session.userId;
+
+      // Destroy the session
+      req.session.destroy(err => {
+          if (err) {
+              return res.status(500).json({ success: "failed", msg: "Logout failed" });
+          }
+          
+          // Clear the session cookie if you're using cookies to manage sessions
+          res.clearCookie('connect.sid'); // Ensure this matches your session cookie name
+          
+          // Optionally, you can log the user ID for audit purposes
+          console.log(`User logged out: ${userId}`);
+
+          return res.json({ success: "success", msg: "Logged out successfully" });
+      });
   } catch (err) {
-    return res.status(500).json({ success: "failed", msg: err.message });
+      return res.status(500).json({ success: "failed", msg: err.message });
   }
 };
+
 
 
 // Verify OTP function

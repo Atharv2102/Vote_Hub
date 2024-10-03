@@ -6,6 +6,7 @@ const OtpVerificationSchema = require('../models/Otp');
 const OtpVerification = require('../models/Otp');
 const multer = require('multer');
 const path = require('path');
+const jwt = require('jsonwebtoken');
 
 dotenv.config();
 
@@ -102,61 +103,48 @@ const signup = async (req, res) => {
     }
   });
 };
-
 const login = async (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    try {
-        // Validate input
-        if (!email || !password) {
-            return res.status(400).json({ success: "failed", msg: "Please provide email and password" });
-        }
+  try {
+      // Validate input
+      if (!email || !password) {
+          return res.status(400).json({ success: "failed", msg: "Please provide email and password" });
+      }
 
-        // Check if the user exists
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ success: "failed", msg: "Invalid credentials" });
-        }
+      // Check if the user exists
+      const user = await User.findOne({ email });
+      if (!user) {
+          return res.status(400).json({ success: "failed", msg: "Invalid credentials" });
+      }
 
-        // Check if the user is verified
-        if (!user.isVerified) {
-            return res.status(400).json({ success: "failed", msg: "Account is not verified. Please verify your account first." });
-        }
+      // Check if the user is verified
+      if (!user.isVerified) {
+          return res.status(400).json({ success: "failed", msg: "Account is not verified. Please verify your account first." });
+      }
 
-        // Compare the entered password with the hashed password
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ success: "failed", msg: "Invalid credentials" });
-        }
-        console.log("old session id = "+req.session.id);
-        // Regenerate session
-        
-        req.session.regenerate((err) => {
-            if (err) {
-                return res.status(500).json({ success: "failed", msg: "Could not regenerate session" });
-            }
+      // Compare the entered password with the hashed password
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+          return res.status(400).json({ success: "failed", msg: "Invalid credentials" });
+      }
+      const token = jwt.sign(
+        { id: user._id, email: user.email, pinCode: user.pinCode }, // Payload
+        process.env.JWT_SECRET, // Secret key from environment variables
+        { expiresIn: '1h' } // Token expiry time
+      );
 
-            // Store user session
-           // req.session.user.userId = user._id;  // Storing user ID in session
-            req.session.cookie.isAuthenticated = "true";  // Optional: Store authenticated state
-            console.log("new session id = "+req.session.id)
-            console.log(req.session);
-           // console.log(req.session.isAuthenticated)
-            // Optionally set a new expiration time
-            req.session.cookie.maxAge = 30 * 60 * 1000; // 30 minutes
-            console.log("req.session.cookie = " +req.session)
-            console.log( "Authentication state  = "+req.session.cookie.isAuthenticated)
-            console.log("Session expires at:", req.session.cookie.expires);
-
-            // Respond with success
-            return res.json({ success: "success", msg: "Logged in successfully", user: { id: user._id, email: user.email, pinCode: user.pinCode } });
-        });
-
-    } catch (err) {
-        // Catch any errors and respond with status 500
-        return res.status(500).json({ success: "failed", msg: err.message });
-    }
+      //res.cookie('token', token, { httpOnly: true,  }); 
+      //res.cookie('isAuth', true, { httpOnly: true, });
+      return res.json({ success: "success", 
+        msg: "Logged in successfully", 
+        user: { id: user._id, email: user.email, pinCode: user.pinCode  , token: token } });
+  } catch (err) {
+      console.error("Login error:", err);
+      return res.status(500).json({ success: "failed", msg: "Internal server error" });
+  }
 };
+
 
 const logout = (req, res) => {
   try {

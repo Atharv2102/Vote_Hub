@@ -4,6 +4,7 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { useUserContext } from '../context/userContext';
+import Cookies from 'js-cookie';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -31,8 +32,11 @@ export default function LoginPage() {
       const { data } = await axios.post('http://localhost:5002/api/auth/login', { email, password }, { withCredentials: true });
       //console.log(data.user.pinCode)
       // Clear error message on successful login
+      //console.log("=token is here "+data.user.token)
+      //const token=data.user.token;
       setError('');
-      
+      Cookies.set('token', data.user.token, { expires: 1 });
+      console.log("Token stored in cookies");
       if (data.user.pinCode) {
         setPincode(data.user.pinCode);
         setUserID(data.user.id);
@@ -49,10 +53,11 @@ export default function LoginPage() {
         setError('Pincode is absent.');
       }
     } catch (e) {
+      console.log(e.response)
       setError(e.response?.data?.message || 'Email/Password incorrect');
     }
   }
-  
+  //Cookies.set('token', tok , { expires: 1 });
   if (redirect) {
     return <Navigate to="/vote" />;
   }

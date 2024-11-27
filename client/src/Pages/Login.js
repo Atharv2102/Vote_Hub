@@ -12,9 +12,8 @@ export default function LoginPage() {
   const [redirect, setRedirect] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState(''); // State for error message
-  const { pincode, setPincode } = useUserContext();
-  const { userId, setUserID } = useUserContext();
+  const [error, setError] = useState('');
+  const { setPincode, setUserID } = useUserContext();
 
   useEffect(() => {
     const storedEmail = localStorage.getItem('rememberedEmail');
@@ -25,22 +24,25 @@ export default function LoginPage() {
     }
   }, []);
 
+  // Login using email and password
   async function loginUser(ev) {
     ev.preventDefault();
 
     try {
-      const { data } = await axios.post('http://localhost:5002/api/auth/login', { email, password }, { withCredentials: true });
-      //console.log(data.user.pinCode)
-      // Clear error message on successful login
-      //console.log("=token is here "+data.user.token)
-      //const token=data.user.token;
+      const { data } = await axios.post(
+        'http://localhost:5002/api/auth/login',
+        { email, password },
+        { withCredentials: true }
+      );
       setError('');
-      Cookies.set('token', data.user.token, { expires: 1 });
-      console.log("Token stored in cookies");
+      Cookies.set('token', data.user.token, { expires: 1 }); 
+      Cookies.set()// Store token in cookies
+
       if (data.user.pinCode) {
         setPincode(data.user.pinCode);
         setUserID(data.user.id);
-        console.log(data.user.id);
+
+        // Remember user if "Remember Me" is checked
         if (rememberMe) {
           localStorage.setItem('rememberedEmail', email);
           localStorage.setItem('rememberedPass', password);
@@ -48,19 +50,26 @@ export default function LoginPage() {
           localStorage.removeItem('rememberedEmail');
           localStorage.removeItem('rememberedPass');
         }
-        setRedirect(true);
+        setRedirect(true);  // Trigger redirection to the homepage
       } else {
         setError('Pincode is absent.');
       }
     } catch (e) {
-      console.log(e.response)
+      console.log(e.response);
       setError(e.response?.data?.message || 'Email/Password incorrect');
     }
   }
-  //Cookies.set('token', tok , { expires: 1 });
+
+  // Redirect after successful login
   if (redirect) {
-    return <Navigate to="/vote" />;
+    return <Navigate to="/vote" />; // Redirect to /vote after login
   }
+
+  // Handle Google OAuth login by redirecting to backend route
+  const handleGoogleLogin = () => {
+    window.location.href = 'http://localhost:5002/auth/google';
+  };
+  
 
   return (
     <div className="flex w-full h-full px-10 py-10 justify-center mt-20 bg-gray-100">
@@ -113,6 +122,17 @@ export default function LoginPage() {
           </div>
 
           {error && <p className="text-red-500 mb-4">{error}</p>} {/* Display error message */}
+
+          {/* Google Login Button */}
+          <div className="w-full py-2">
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              className="w-full py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300"
+            >
+              Sign in with Google
+            </button>
+          </div>
 
           <div className="w-full py-2">
             <Link to="/signin">

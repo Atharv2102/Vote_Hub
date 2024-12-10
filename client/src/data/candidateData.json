@@ -6,8 +6,8 @@
         "votes":0,
         "pincode":"226022",
         "partyName":"BJP",
-        "image":"",
-        "partySymbol":""
+        "image":"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+        "partySymbol":"https://www.shutterstock.com/image-vector/orange-lotus-bjp-logo-vector-600nw-1750364873.jpg"
     },
     {
         "id":2,
@@ -16,8 +16,8 @@
         "votes":0,
         "pincode":"226022",
         "partyName":"INC",
-        "image":"",
-        "partySymbol":""
+        "image":"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+        "partySymbol":"https://upload.wikimedia.org/wikipedia/commons/a/ad/INC_Logo.png"
     },
     {
         "id":3,
@@ -26,8 +26,8 @@
         "votes":0,
         "pincode":"226022",
         "partyName":"SP",
-        "image":"",
-        "partySymbol":""
+        "image":"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+        "partySymbol":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcxd5AcyYBtrqyvVRB8XJToPSZg4kfQ-bkbA&s"
     },
     {
         "id":4,
@@ -36,7 +36,7 @@
         "votes":0,
         "pincode":"226024",
         "partyName":"BSP",
-        "image":"",
+        "image":"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
         "partySymbol":""
     },
     {
@@ -46,7 +46,7 @@
         "votes":0,
         "pincode":"226023",
         "partyName":"RJD",
-        "image":"",
+        "image":"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
         "partySymbol":""
     }
 ]

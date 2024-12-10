@@ -34,7 +34,7 @@ transporter.verify((error, success) => {
 const storage = multer.diskStorage({
   destination: './uploads/', // Save files to 'uploads' folder
   filename: (req, file, cb) => {
-    cb(null, ${Date.now()}-${file.originalname});
+    cb(null, `${Date.now()}-${file.originalname}`);
   }
 });
 
@@ -202,7 +202,7 @@ const logout = (req, res) => {
           res.clearCookie('connect.sid'); // Ensure this matches your session cookie name
           
           // Optionally, you can log the user ID for audit purposes
-          console.log(User logged out: ${userId});
+          console.log(`User logged out: ${userId}`);
 
           return res.json({ success: "success", msg: "Logged out successfully" });
       });
@@ -291,12 +291,12 @@ const verifyOtp = async (req, res) => {
 // Function to send OTP verification email
 const sendOtpVerificationEmail = async (user, res) => {
   try {
-    const otp = ${Math.floor(1000 + Math.random() * 9000)};
+    const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: user.email,
       subject: "OTP Verification",
-      html: <p>Enter the OTP <b>${otp}</b></p>
+      html: `<p>Enter the OTP <b>${otp}</b></p>`
     };
 
     const saltRounds = 10;

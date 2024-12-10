@@ -6,6 +6,7 @@ const OtpVerificationSchema = require('../models/Otp');
 const OtpVerification = require('../models/Otp');
 const multer = require('multer');
 const path = require('path');
+const jwt = require('jsonwebtoken');
 
 dotenv.config();
 
@@ -33,7 +34,7 @@ transporter.verify((error, success) => {
 const storage = multer.diskStorage({
   destination: './uploads/', // Save files to 'uploads' folder
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
+    cb(null, ${Date.now()}-${file.originalname});
   }
 });
 
@@ -103,6 +104,41 @@ const signup = async (req, res) => {
   });
 };
 
+const updateProfile = async (req, res) => {
+  const { voterId, name, email, pinCode, password } = req.body;
+
+  try {
+    // Validate input
+    if (!name || !email || !pinCode) {
+      return res.status(400).json({ success: false, msg: "Please provide all required fields." });
+    }
+
+    // Find the user by voterId or email (assuming voterId is unique)
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ success: false, msg: "User not found." });
+    }
+
+    // Update the user details with the new data
+    user.name = name || user.name;
+    user.email = email || user.email;
+    user.pinCode = pinCode || user.pinCode;
+
+    // Optionally hash the password if provided
+    if (password) {
+      user.password = await bcrypt.hash(password, 10);
+    }
+    console.log(user);
+    // Save the updated user details
+    await user.save();
+
+    return res.status(200).json({ success: true, msg: "User profile updated successfully." });
+  } catch (err) {
+    return res.status(500).json({ success: false, msg: err.message });
+  }
+};
+
 const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -128,52 +164,22 @@ const login = async (req, res) => {
       if (!isMatch) {
           return res.status(400).json({ success: "failed", msg: "Invalid credentials" });
       }
+      const token = jwt.sign(
+        { id: user._id, email: user.email, pinCode: user.pinCode }, // Payload
+        process.env.JWT_SECRET, // Secret key from environment variables
+        { expiresIn: '1h' } // Token expiry time
+      );
 
-      console.log("Old session ID: " + req.session.id);
-
-      // Regenerate session to prevent session fixation attacks
-      req.session.regenerate((err) => {
-          if (err) {
-              return res.status(500).json({ success: "failed", msg: "Could not regenerate session" });
-          }
-
-          // Store user info and authenticated state in session
-          req.session.userId = user._id;  // Storing user ID in session
-          req.session.isAuthenticated = true;  // Store authenticated state
-
-          // Optionally set a new expiration time (30 minutes)
-          req.session.cookie.maxAge = 1000;
-
-          console.log("New session ID: " + req.session.id);
-          console.log("Session: ", req.session);
-          console.log("Session expires in: " + req.session.cookie.maxAge / 1000 + " seconds");
-
-          // Save the session to make sure the session is persisted
-          req.session.save((saveErr) => {
-              if (saveErr) {
-                  return res.status(500).json({ success: "failed", msg: "Could not save session" });
-              }
-
-              // Respond with success after session is saved
-              console.log("Session saved after login:", req.session);
-              return res.json({
-                  success: "success",
-                  msg: "Logged in successfully",
-                  user: {
-                      id: user._id,
-                      email: user.email,
-                      pinCode: user.pinCode,
-                  },
-              });
-          });
-      });
-
+      //res.cookie('token', token, { httpOnly: true,  }); 
+      //res.cookie('isAuth', true, { httpOnly: true, });
+      return res.json({ success: "success", 
+        msg: "Logged in successfully", 
+        user: { id: user._id, email: user.email, pinCode: user.pinCode  , token: token } });
   } catch (err) {
-      // Catch any errors and respond with status 500
-      return res.status(500).json({ success: "failed", msg: err.message });
+      console.error("Login error:", err);
+      return res.status(500).json({ success: "failed", msg: "Internal server error" });
   }
 };
-
 
 
 const logout = (req, res) => {
@@ -196,7 +202,7 @@ const logout = (req, res) => {
           res.clearCookie('connect.sid'); // Ensure this matches your session cookie name
           
           // Optionally, you can log the user ID for audit purposes
-          console.log(`User logged out: ${userId}`);
+          console.log(User logged out: ${userId});
 
           return res.json({ success: "success", msg: "Logged out successfully" });
       });
@@ -204,6 +210,30 @@ const logout = (req, res) => {
       return res.status(500).json({ success: "failed", msg: err.message });
   }
 };
+
+const getUserByEmail = async (req, res) => {
+  const { email } = req.query;
+
+  try {
+    // Validate email presence
+    if (!email) {
+      return res.status(400).json({ success: false, msg: "Email is required." });
+    }
+
+    // Find the user by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ success: false, msg: "User not found." });
+    }
+
+    // Return the user details
+    return res.status(200).json({ success: true, user });
+  } catch (err) {
+    return res.status(500).json({ success: false, msg: err.message });
+  }
+};
+
 
 
 
@@ -261,12 +291,12 @@ const verifyOtp = async (req, res) => {
 // Function to send OTP verification email
 const sendOtpVerificationEmail = async (user, res) => {
   try {
-    const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
+    const otp = ${Math.floor(1000 + Math.random() * 9000)};
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: user.email,
       subject: "OTP Verification",
-      html: `<p>Enter the OTP <b>${otp}</b></p>`
+      html: <p>Enter the OTP <b>${otp}</b></p>
     };
 
     const saltRounds = 10;
@@ -321,5 +351,4 @@ const resendOtp = async (req, res) => {
 
 
 
-module.exports = { signup, verifyOtp, login, logout , resendOtp,upload};
-
+module.exports = { signup, verifyOtp, login, updateProfile ,logout , resendOtp, upload , getUserByEmail};

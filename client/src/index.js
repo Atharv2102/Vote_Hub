@@ -7,6 +7,7 @@ import Home from './Pages/Home';
 import Vote from './Pages/Vote';
 import Results from './Pages/Results';
 import Benefits from './Pages/Benefits';
+import Profile from './Pages/Profile';
 import Notfound from './Pages/Notfound';  
 import Login from './Pages/Login';
 import SignIn from './Pages/SignIn';  
@@ -33,6 +34,7 @@ const appRouter = createBrowserRouter([
             { path: "/vote", element: <Vote /> },
             { path: "/results", element: <Results /> },
             { path: "/benefits", element: <Benefits /> },
+            { path: "/profile", element: <Profile /> },
             { path: "*", element: <Notfound /> },
             { path: "/login", element: <Login /> },
             { path: "/signin", element: <SignIn /> },

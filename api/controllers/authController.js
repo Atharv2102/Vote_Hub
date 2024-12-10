@@ -103,6 +103,42 @@ const signup = async (req, res) => {
     }
   });
 };
+
+const updateProfile = async (req, res) => {
+  const { voterId, name, email, pinCode, password } = req.body;
+
+  try {
+    // Validate input
+    if (!name || !email || !pinCode) {
+      return res.status(400).json({ success: false, msg: "Please provide all required fields." });
+    }
+
+    // Find the user by voterId or email (assuming voterId is unique)
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ success: false, msg: "User not found." });
+    }
+
+    // Update the user details with the new data
+    user.name = name || user.name;
+    user.email = email || user.email;
+    user.pinCode = pinCode || user.pinCode;
+
+    // Optionally hash the password if provided
+    if (password) {
+      user.password = await bcrypt.hash(password, 10);
+    }
+    console.log(user);
+    // Save the updated user details
+    await user.save();
+
+    return res.status(200).json({ success: true, msg: "User profile updated successfully." });
+  } catch (err) {
+    return res.status(500).json({ success: false, msg: err.message });
+  }
+};
+
 const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -174,6 +210,30 @@ const logout = (req, res) => {
       return res.status(500).json({ success: "failed", msg: err.message });
   }
 };
+
+const getUserByEmail = async (req, res) => {
+  const { email } = req.query;
+
+  try {
+    // Validate email presence
+    if (!email) {
+      return res.status(400).json({ success: false, msg: "Email is required." });
+    }
+
+    // Find the user by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ success: false, msg: "User not found." });
+    }
+
+    // Return the user details
+    return res.status(200).json({ success: true, user });
+  } catch (err) {
+    return res.status(500).json({ success: false, msg: err.message });
+  }
+};
+
 
 
 
@@ -291,5 +351,5 @@ const resendOtp = async (req, res) => {
 
 
 
-module.exports = { signup, verifyOtp, login, logout , resendOtp,upload};
+module.exports = { signup, verifyOtp, login, updateProfile ,logout , resendOtp, upload , getUserByEmail};
 

@@ -1,8 +1,8 @@
 
 exports.isAuthenticated = (req, res, next) => {
-  console.log("from auth middleware = "+req.session.isAuthenticated);
-  console.log("auth middleware = "+req.session)
-  if (req.session.isAuthenticated) {
+  console.log("Complete session object in middleware:", JSON.stringify(req.session, null, 2));
+
+  if (req.session) {
     return next();
   } else {
    // console.log("unauthorized hai ")

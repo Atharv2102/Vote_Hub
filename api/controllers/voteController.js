@@ -1,4 +1,4 @@
-// backend/routes/vote.js
+// / backend/routes/vote.js
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User'); // Assuming a User model for MongoD

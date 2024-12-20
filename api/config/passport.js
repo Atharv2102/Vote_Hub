@@ -16,6 +16,7 @@ async function (request, accessToken, refreshToken, profile, done) {
     const email = profile.emails[0].value; // Correctly access email
     const displayName = profile.displayName;
     const photo = profile.photos[0]?.value || '';
+    console.log(photo);
 
     // Check if the user already exists
     let user = await User.findOne({ email });
@@ -42,6 +43,7 @@ async function (request, accessToken, refreshToken, profile, done) {
       });
 
       // Save the new user
+
       user = await newUser.save();
 
       // Generate a token for the new user

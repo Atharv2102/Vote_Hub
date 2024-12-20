@@ -31,6 +31,7 @@ const appRouter = createBrowserRouter([
         element: <Applayout />,
         children: [
             { path: "/", element: <Home /> },
+            
             { path: "/vote", element: <Vote /> },
             { path: "/results", element: <Results /> },
             { path: "/benefits", element: <Benefits /> },
